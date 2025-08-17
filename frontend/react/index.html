@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Management - React</title>
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Styles -->
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .app-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .app-header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        /* Navigation */
+        .tab-nav {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+            border-bottom-color: #ffd700;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .section-header h2 {
+            color: #495057;
+            font-size: 1.8em;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f8f9fb;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading i {
+            font-size: 2em;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error */
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        /* Analytics */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .analytics-card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .product-stats {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .product-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .tab-nav {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1 1 50%;
+                min-width: 120px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:8000';
+
+        // API Helper Function
+        const apiCall = async (endpoint, options = {}) => {
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        };
+
+        // Toast Component
+        const Toast = ({ message, type, isVisible, onClose }) => {
+            useEffect(() => {
+                if (isVisible) {
+                    const timer = setTimeout(onClose, 3000);
+                    return () => clearTimeout(timer);
+                }
+            }, [isVisible, onClose]);
+
+            if (!isVisible) return null;
+
+            return (
+                <div className={`toast ${type} show`}>
+                    {message}
+                </div>
+            );
+        };
+
+        // Modal Component
+        const Modal = ({ isOpen, onClose, title, children }) => {
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>{title}</h3>
+                            <button className="modal-close" onClick={onClose}>&times;</button>
+                        </div>
+                        <div className="modal-body">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Order Form Component
+        const OrderForm = ({ order, onSave, onCancel }) => {
+            const [formData, setFormData] = useState({
+                customer_id: order?.customer_id || '',
+                order_date: order?.order_date || new Date().toISOString().split('T')[0]
+            });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave({
+                    ...formData,
+                    customer_id: parseInt(formData.customer_id)
+                });
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="customer_id">Customer ID:</label>
+                        <input
+                            type="number"
+                            id="customer_id"
+                            name="customer_id"
+                            value={formData.customer_id}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="order_date">Order Date:</label>
+                        <input
+                            type="date"
+                            id="order_date"
+                            name="order_date"
+                            value={formData.order_date}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-buttons">
+                        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            {order ? 'Update Order' : 'Create Order'}
+                        </button>
+                    </div>
+                </form>
+            );
+        };
+
+        // Item Form Component
+        const ItemForm = ({ item, onSave, onCancel }) => {
+            const [formData, setFormData] = useState({
+                order_id: item?.order_id || '',
+                product_id: item?.product_id || '',
+                quantity: item?.quantity || '',
+                unit_price: item?.unit_price || ''
+            });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave({
+                    order_id: parseInt(formData.order_id),
+                    product_id: parseInt(formData.product_id),
+                    quantity: parseInt(formData.quantity),
+                    unit_price: parseFloat(formData.unit_price)
+                });
+            };
+
+            const handleChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            return (
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="order_id">Order ID:</label>
+                        <input
+                            type="number"
+                            id="order_id"
+                            name="order_id"
+                            value={formData.order_id}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="product_id">Product ID:</label>
+                        <input
+                            type="number"
+                            id="product_id"
+                            name="product_id"
+                            value={formData.product_id}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="quantity">Quantity:</label>
+                        <input
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            value={formData.quantity}
+                            onChange={handleChange}
+                            min="1"
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="unit_price">Unit Price:</label>
+                        <input
+                            type="number"
+                            id="unit_price"
+                            name="unit_price"
+                            value={formData.unit_price}
+                            onChange={handleChange}
+                            step="0.01"
+                            min="0"
+                            required
+                        />
+                    </div>
+                    <div className="form-buttons">
+                        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            {item ? 'Update Item' : 'Create Item'}
+                        </button>
+                    </div>
+                </form>
+            );
+        };
+
+        // Orders Table Component
+        const OrdersTable = ({ orders, onEdit, onDelete, onViewDetails }) => (
+            <div className="table-container">
+                <table className="data-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer ID</th>
+                            <th>Order Date</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {orders.map(order => (
+                            <tr key={order.order_id}>
+                                <td>#{order.order_id}</td>
+                                <td>{order.customer_id}</td>
+                                <td>{new Date(order.order_date).toLocaleDateString()}</td>
+                                <td>${order.total_amount.toFixed(2)}</td>
+                                <td>
+                                    <div className="action-buttons">
+                                        <button 
+                                            className="btn btn-sm btn-primary"
+                                            onClick={() => onViewDetails(order.order_id)}
+                                        >
+                                            <i className="fas fa-eye"></i> Details
+                                        </button>
+                                        <button 
+                                            className="btn btn-sm btn-warning"
+                                            onClick={() => onEdit(order)}
+                                        >
+                                            <i className="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button 
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => onDelete(order.order_id)}
+                                        >
+                                            <i className="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+
+        // Items Table Component
+        const ItemsTable = ({ items, onEdit, onDelete }) => (
+            <div className="table-container">
+                <table className="data-table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Order ID</th>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Line Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map(item => (
+                            <tr key={item.order_item_id}>
+                                <td>#{item.order_item_id}</td>
+                                <td>#{item.order_id}</td>
+                                <td>#{item.product_id}</td>
+                                <td>{item.quantity}</td>
+                                <td>${item.unit_price.toFixed(2)}</td>
+                                <td>${item.line_total.toFixed(2)}</td>
+                                <td>
+                                    <div className="action-buttons">
+                                        <button 
+                                            className="btn btn-sm btn-warning"
+                                            onClick={() => onEdit(item)}
+                                        >
+                                            <i className="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button 
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => onDelete(item.order_item_id)}
+                                        >
+                                            <i className="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+
+        // Order Details Component
+        const OrderDetails = ({ orderId, onClose }) => {
+            const [order, setOrder] = useState(null);
+            const [summary, setSummary] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const loadOrderDetails = async () => {
+                    try {
+                        const [orderData, summaryData] = await Promise.all([
+                            apiCall(`/orders/${orderId}/`),
+                            apiCall(`/orders/${orderId}/summary/`)
+                        ]);
+                        setOrder(orderData);
+                        setSummary(summaryData);
+                    } catch (error) {
+                        console.error('Failed to load order details:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                loadOrderDetails();
+            }, [orderId]);
+
+            if (loading) {
+                return (
+                    <div className="loading">
+                        <i className="fas fa-spinner"></i>
+                        <p>Loading order details...</p>
+                    </div>
+                );
+            }
+
+            if (!order || !summary) {
+                return <div className="error">Failed to load order details</div>;
+            }
+
+            return (
+                <div>
+                    <div className="form-group">
+                        <label>Customer ID:</label>
+                        <p>{order.customer_id}</p>
+                    </div>
+                    <div className="form-group">
+                        <label>Order Date:</label>
+                        <p>{new Date(order.order_date).toLocaleDateString()}</p>
+                    </div>
+                    <div className="form-group">
+                        <label>Total Amount:</label>
+                        <p>${order.total_amount.toFixed(2)}</p>
+                    </div>
+                    
+                    <hr style={{margin: '20px 0'}} />
+                    
+                    <h4><i className="fas fa-list"></i> Order Items ({summary.summary.total_items})</h4>
+                    <div style={{marginTop: '15px'}}>
+                        {summary.items.length === 0 ? (
+                            <p>No items in this order</p>
+                        ) : (
+                            summary.items.map(item => (
+                                <div key={item.order_item_id} style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    padding: '10px',
+                                    background: '#f8f9fa',
+                                    margin: '5px 0',
+                                    borderRadius: '5px',
+                                    borderLeft: '4px solid #667eea'
+                                }}>
+                                    <div>
+                                        <strong>Product #{item.product_id}</strong><br />
+                                        Qty: {item.quantity} × ${item.unit_price.toFixed(2)}
+                                    </div>
+                                    <div>
+                                        <strong>${item.line_total.toFixed(2)}</strong>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="form-buttons">
+                        <button className="btn btn-secondary" onClick={onClose}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // Analytics Component
+        const Analytics = ({ stats }) => {
+            if (!stats) return <div className="loading">Loading analytics...</div>;
+
+            return (
+                <div className="analytics-grid">
+                    <div className="analytics-card">
+                        <h3><i className="fas fa-shopping-bag"></i> Top Products</h3>
+                        <div className="product-stats">
+                            {Object.entries(stats.product_stats)
+                                .sort(([,a], [,b]) => b.revenue - a.revenue)
+                                .slice(0, 10)
+                                .map(([productId, data]) => (
+                                    <div key={productId} className="product-stat">
+                                        <div>
+                                            <div><strong>Product #{productId}</strong></div>
+                                            <div>Qty: {data.quantity}</div>
+                                        </div>
+                                        <div><strong>${data.revenue.toFixed(2)}</strong></div>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+
+                    <div className="analytics-card">
+                        <h3><i className="fas fa-calendar-alt"></i> Date Range</h3>
+                        <div>
+                            <p><strong>Earliest:</strong> {new Date(stats.date_range.earliest_order).toLocaleDateString()}</p>
+                            <p><strong>Latest:</strong> {new Date(stats.date_range.latest_order).toLocaleDateString()}</p>
+                            <p><strong>Customers:</strong> {stats.unique_customers}</p>
+                            <p><strong>Products:</strong> {stats.unique_products}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            // State management
+            const [activeTab, setActiveTab] = useState('orders');
+            const [orders, setOrders] = useState([]);
+            const [items, setItems] = useState([]);
+            const [stats, setStats] = useState(null);
+            const [loading, setLoading] = useState(false);
+            
+            // Modal states
+            const [orderModalOpen, setOrderModalOpen] = useState(false);
+            const [itemModalOpen, setItemModalOpen] = useState(false);
+            const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+            const [selectedOrder, setSelectedOrder] = useState(null);
+            const [selectedItem, setSelectedItem] = useState(null);
+            const [selectedOrderId, setSelectedOrderId] = useState(null);
+            
+            // Toast states
+            const [toast, setToast] = useState({ message: '', type: 'success', isVisible: false });
+
+            // Load data functions
+            const loadOrders = useCallback(async () => {
+                try {
+                    setLoading(true);
+                    const data = await apiCall('/orders/');
+                    setOrders(data);
+                } catch (error) {
+                    showToast('Failed to load orders', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+
+            const loadItems = useCallback(async () => {
+                try {
+                    setLoading(true);
+                    const data = await apiCall('/order-items/');
+                    setItems(data);
+                } catch (error) {
+                    showToast('Failed to load items', 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+
+            const loadStats = useCallback(async () => {
+                try {
+                    const data = await apiCall('/stats');
+                    setStats(data);
+                } catch (error) {
+                    showToast('Failed to load statistics', 'error');
+                }
+            }, []);
+
+            // Toast helper
+            const showToast = (message, type = 'success') => {
+                setToast({ message, type, isVisible: true });
+            };
+
+            const hideToast = () => {
+                setToast(prev => ({ ...prev, isVisible: false }));
+            };
+
+            // CRUD operations
+            const handleCreateOrder = () => {
+                setSelectedOrder(null);
+                setOrderModalOpen(true);
+            };
+
+            const handleEditOrder = (order) => {
+                setSelectedOrder(order);
+                setOrderModalOpen(true);
+            };
+
+            const handleSaveOrder = async (orderData) => {
+                try {
+                    if (selectedOrder) {
+                        await apiCall(`/orders/${selectedOrder.order_id}/`, {
+                            method: 'PUT',
+                            body: JSON.stringify(orderData)
+                        });
+                        showToast('Order updated successfully!');
+                    } else {
+                        await apiCall('/orders/', {
+                            method: 'POST',
+                            body: JSON.stringify(orderData)
+                        });
+                        showToast('Order created successfully!');
+                    }
+                    
+                    setOrderModalOpen(false);
+                    await Promise.all([loadOrders(), loadStats()]);
+                } catch (error) {
+                    showToast('Failed to save order', 'error');
+                }
+            };
+
+            const handleDeleteOrder = async (orderId) => {
+                if (window.confirm(`Are you sure you want to delete Order #${orderId}?`)) {
+                    try {
+                        await apiCall(`/orders/${orderId}/`, { method: 'DELETE' });
+                        showToast('Order deleted successfully!');
+                        await Promise.all([loadOrders(), loadStats()]);
+                    } catch (error) {
+                        showToast('Failed to delete order', 'error');
+                    }
+                }
+            };
+
+            const handleCreateItem = () => {
+                setSelectedItem(null);
+                setItemModalOpen(true);
+            };
+
+            const handleEditItem = (item) => {
+                setSelectedItem(item);
+                setItemModalOpen(true);
+            };
+
+            const handleSaveItem = async (itemData) => {
+                try {
+                    if (selectedItem) {
+                        await apiCall(`/order-items/${selectedItem.order_item_id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(itemData)
+                        });
+                        showToast('Item updated successfully!');
+                    } else {
+                        await apiCall('/order-items/', {
+                            method: 'POST',
+                            body: JSON.stringify(itemData)
+                        });
+                        showToast('Item created successfully!');
+                    }
+                    
+                    setItemModalOpen(false);
+                    await Promise.all([loadItems(), loadOrders(), loadStats()]);
+                } catch (error) {
+                    showToast('Failed to save item', 'error');
+                }
+            };
+
+            const handleDeleteItem = async (itemId) => {
+                if (window.confirm(`Are you sure you want to delete Item #${itemId}?`)) {
+                    try {
+                        await apiCall(`/order-items/${itemId}`, { method: 'DELETE' });
+                        showToast('Item deleted successfully!');
+                        await Promise.all([loadItems(), loadOrders(), loadStats()]);
+                    } catch (error) {
+                        showToast('Failed to delete item', 'error');
+                    }
+                }
+            };
+
+            const handleViewOrderDetails = (orderId) => {
+                setSelectedOrderId(orderId);
+                setDetailsModalOpen(true);
+            };
+
+            // Tab switching
+            const handleTabChange = (tab) => {
+                setActiveTab(tab);
+                if (tab === 'analytics') {
+                    loadStats();
+                }
+            };
+
+            // Load initial data
+            useEffect(() => {
+                loadOrders();
+                loadItems();
+                loadStats();
+            }, [loadOrders, loadItems, loadStats]);
+
+            // Render content based on active tab
+            const renderContent = () => {
+                if (loading) {
+                    return (
+                        <div className="loading">
+                            <i className="fas fa-spinner"></i>
+                            <p>Loading...</p>
+                        </div>
+                    );
+                }
+
+                switch (activeTab) {
+                    case 'orders':
+                        return (
+                            <>
+                                <div className="section-header">
+                                    <h2><i className="fas fa-receipt"></i> Orders Management</h2>
+                                    <button className="btn btn-primary" onClick={handleCreateOrder}>
+                                        <i className="fas fa-plus"></i> New Order
+                                    </button>
+                                </div>
+                                <OrdersTable 
+                                    orders={orders}
+                                    onEdit={handleEditOrder}
+                                    onDelete={handleDeleteOrder}
+                                    onViewDetails={handleViewOrderDetails}
+                                />
+                            </>
+                        );
+                    
+                    case 'items':
+                        return (
+                            <>
+                                <div className="section-header">
+                                    <h2><i className="fas fa-list"></i> Order Items Management</h2>
+                                    <button className="btn btn-primary" onClick={handleCreateItem}>
+                                        <i className="fas fa-plus"></i> New Item
+                                    </button>
+                                </div>
+                                <ItemsTable 
+                                    items={items}
+                                    onEdit={handleEditItem}
+                                    onDelete={handleDeleteItem}
+                                />
+                            </>
+                        );
+                    
+                    case 'analytics':
+                        return (
+                            <>
+                                <div className="section-header">
+                                    <h2><i className="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+                                    <button className="btn btn-secondary" onClick={loadStats}>
+                                        <i className="fas fa-sync-alt"></i> Refresh
+                                    </button>
+                                </div>
+                                <Analytics stats={stats} />
+                            </>
+                        );
+                    
+                    default:
+                        return <div>Select a tab</div>;
+                }
+            };
+
+            return (
+                <div className="app-container">
+                    {/* Header */}
+                    <header className="app-header">
+                        <h1><i className="fas fa-shopping-cart"></i> Orders Management System</h1>
+                        <p className="subtitle">React Application</p>
+                        
+                        {stats && (
+                            <div className="stats-bar">
+                                <div className="stat-item">
+                                    <span className="stat-label">Total Orders:</span>
+                                    <span className="stat-value">{stats.total_orders}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Total Revenue:</span>
+                                    <span className="stat-value">${stats.total_revenue.toFixed(2)}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Customers:</span>
+                                    <span className="stat-value">{stats.unique_customers}</span>
+                                </div>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Navigation */}
+                    <nav className="tab-nav">
+                        <button 
+                            className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('orders')}
+                        >
+                            <i className="fas fa-receipt"></i> Orders
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'items' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('items')}
+                        >
+                            <i className="fas fa-list"></i> Order Items
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
+                            onClick={() => handleTabChange('analytics')}
+                        >
+                            <i className="fas fa-chart-bar"></i> Analytics
+                        </button>
+                    </nav>
+
+                    {/* Content */}
+                    <div className="content-area">
+                        {renderContent()}
+                    </div>
+
+                    {/* Modals */}
+                    <Modal 
+                        isOpen={orderModalOpen} 
+                        onClose={() => setOrderModalOpen(false)}
+                        title={selectedOrder ? `Edit Order #${selectedOrder.order_id}` : 'Create New Order'}
+                    >
+                        <OrderForm 
+                            order={selectedOrder}
+                            onSave={handleSaveOrder}
+                            onCancel={() => setOrderModalOpen(false)}
+                        />
+                    </Modal>
+
+                    <Modal 
+                        isOpen={itemModalOpen} 
+                        onClose={() => setItemModalOpen(false)}
+                        title={selectedItem ? `Edit Item #${selectedItem.order_item_id}` : 'Create New Item'}
+                    >
+                        <ItemForm 
+                            item={selectedItem}
+                            onSave={handleSaveItem}
+                            onCancel={() => setItemModalOpen(false)}
+                        />
+                    </Modal>
+
+                    <Modal 
+                        isOpen={detailsModalOpen} 
+                        onClose={() => setDetailsModalOpen(false)}
+                        title={`Order #${selectedOrderId} Details`}
+                    >
+                        {selectedOrderId && (
+                            <OrderDetails 
+                                orderId={selectedOrderId}
+                                onClose={() => setDetailsModalOpen(false)}
+                            />
+                        )}
+                    </Modal>
+
+                    {/* Toast */}
+                    <Toast 
+                        message={toast.message}
+                        type={toast.type}
+                        isVisible={toast.isVisible}
+                        onClose={hideToast}
+                    />
+                </div>
+            );
+        };
+
+        // Render the App
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

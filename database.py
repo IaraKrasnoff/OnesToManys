@@ -112,7 +112,7 @@ class OrderDatabase:
         """Add a new order item to the database"""
         # Calculate line total if not provided
         if order_item.line_total is None:
-            order_item.line_total = order_item.quantity * order_item.unit_price
+            order_item.line_total = round(order_item.quantity * order_item.unit_price, 2)
         
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
@@ -158,7 +158,7 @@ class OrderDatabase:
         """Update an existing order item"""
         # Calculate line total if not provided
         if order_item.line_total is None:
-            order_item.line_total = order_item.quantity * order_item.unit_price
+            order_item.line_total = round(order_item.quantity * order_item.unit_price, 2)
             
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
@@ -206,6 +206,9 @@ class OrderDatabase:
                 WHERE order_id = ?
             """, (order_id,))
             total = cursor.fetchone()[0]
+            
+            # Round to 2 decimal places for currency precision
+            total = round(total, 2)
             
             conn.execute("""
                 UPDATE orders 

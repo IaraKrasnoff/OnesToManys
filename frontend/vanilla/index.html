@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Management System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shopping-cart"></i> Orders Management System</h1>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Total Orders:</span>
+                    <span id="totalOrders" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Revenue:</span>
+                    <span id="totalRevenue" class="stat-value">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Customers:</span>
+                    <span id="totalCustomers" class="stat-value">0</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="tab-nav">
+            <button class="tab-button active" onclick="showTab('orders')">Orders</button>
+            <button class="tab-button" onclick="showTab('items')">Order Items</button>
+            <button class="tab-button" onclick="showTab('analytics')">Analytics</button>
+            <button class="tab-button" onclick="showTab('data-management')">Data Management</button>
+        </nav>
+
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content active">
+            <div class="section-header">
+                <h2><i class="fas fa-receipt"></i> Orders Management</h2>
+                <button class="btn btn-primary" onclick="showCreateOrderModal()">
+                    <i class="fas fa-plus"></i> New Order
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer ID</th>
+                            <th>Order Date</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Orders will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Order Items Tab -->
+        <div id="items" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> Order Items Management</h2>
+                <button class="btn btn-primary" onclick="showCreateItemModal()">
+                    <i class="fas fa-plus"></i> New Item
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Order ID</th>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Line Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <!-- Items will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+                <button class="btn btn-secondary" onclick="refreshAnalytics()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-shopping-bag"></i> Product Performance</h3>
+                    <div id="productStats" class="stats-list">
+                        <!-- Product stats will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3><i class="fas fa-calendar-alt"></i> Date Range</h3>
+                    <div id="dateRange" class="date-info">
+                        <!-- Date range will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="analytics-card full-width">
+                    <h3><i class="fas fa-users"></i> Customer Analysis</h3>
+                    <div id="customerAnalysis">
+                        <!-- Customer analysis will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management Tab -->
+        <div id="data-management" class="tab-content">
+            <div class="section-header">
+                <h2><i class="fas fa-database"></i> Data Management</h2>
+            </div>
+
+            <div class="data-management-grid">
+                <div class="management-card">
+                    <h3><i class="fas fa-download"></i> Export Data</h3>
+                    <p>Export your orders and items data</p>
+                    <button class="btn btn-primary" onclick="exportData('json')">Export JSON</button>
+                    <button class="btn btn-secondary" onclick="exportData('sql')">Export SQL</button>
+                </div>
+
+                <div class="management-card">
+                    <h3><i class="fas fa-upload"></i> Import Data</h3>
+                    <p>Import orders data from JSON</p>
+                    <input type="file" id="importFile" accept=".json" style="margin-bottom: 10px;">
+                    <button class="btn btn-primary" onclick="importData()">Import JSON</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="orderModalTitle">Create New Order</h3>
+                <span class="close" onclick="closeOrderModal()">&times;</span>
+            </div>
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="customerId">Customer ID:</label>
+                    <input type="number" id="customerId" required>
+                </div>
+                <div class="form-group">
+                    <label for="orderDate">Order Date:</label>
+                    <input type="date" id="orderDate" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeOrderModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Order</button>
+                </div>
+            </form>
+            
+            <!-- Order Items Section (for editing existing orders) -->
+            <div id="orderItemsSection" style="display: none;">
+                <hr>
+                <div class="section-header">
+                    <h4><i class="fas fa-list"></i> Order Items</h4>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="showAddItemToOrderModal()">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                </div>
+                <div id="orderItemsList">
+                    <!-- Order items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="itemModalTitle">Create New Item</h3>
+                <span class="close" onclick="closeItemModal()">&times;</span>
+            </div>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label for="itemOrderId">Order ID:</label>
+                    <input type="number" id="itemOrderId" required>
+                </div>
+                <div class="form-group">
+                    <label for="productId">Product ID:</label>
+                    <input type="number" id="productId" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="unitPrice">Unit Price:</label>
+                    <input type="number" id="unitPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeItemModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Item to Order Modal -->
+    <div id="addItemToOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Item to Order</h3>
+                <span class="close" onclick="closeAddItemToOrderModal()">&times;</span>
+            </div>
+            <form id="addItemToOrderForm">
+                <div class="form-group">
+                    <label for="newProductId">Product ID:</label>
+                    <input type="number" id="newProductId" required>
+                </div>
+                <div class="form-group">
+                    <label for="newQuantity">Quantity:</label>
+                    <input type="number" id="newQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="newUnitPrice">Unit Price:</label>
+                    <input type="number" id="newUnitPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddItemToOrderModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast" style="display: none;">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

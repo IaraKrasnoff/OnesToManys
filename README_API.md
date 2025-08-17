@@ -59,16 +59,6 @@ python sample_data.py
 | PUT | `/orders/{order_id}` | Update existing order |
 | DELETE | `/orders/{order_id}` | Delete order (cascades to items) |
 
-### Order Items (Detail Table)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/order-items/` | Get all order items |
-| GET | `/order-items/{item_id}` | Get specific order item |
-| GET | `/orders/{order_id}/items` | Get all items for an order |
-| POST | `/order-items/` | Create new order item |
-| PUT | `/order-items/{item_id}` | Update existing order item |
-| DELETE | `/order-items/{item_id}` | Delete order item |
 
 ## curl Testing Commands
 

@@ -132,7 +132,7 @@ def test_delete_order():
     assert get_response.status_code == 404
 
 def test_create_order_item():
-    """Test creating a new order item"""
+    """Test creating a new order item using order-specific endpoint"""
     # First create an order
     order_data = {
         "customer_id": 501,
@@ -143,15 +143,14 @@ def test_create_order_item():
     order_response = client.post("/orders/", json=order_data)
     order_id = order_response.json()["order_id"]
     
-    # Then create an order item
+    # Then create an order item using the order-specific endpoint
     order_item_data = {
-        "order_id": order_id,
         "product_id": 1001,
         "quantity": 2,
         "unit_price": 10.50
     }
     
-    response = client.post("/order-items/", json=order_item_data)
+    response = client.post(f"/orders/{order_id}/items", json=order_item_data)
     assert response.status_code == 200
     
     created_item = response.json()
@@ -174,16 +173,14 @@ def test_get_order_items_by_order():
     order_response = client.post("/orders/", json=order_data)
     order_id = order_response.json()["order_id"]
     
-    # Create multiple order items
+    # Create multiple order items using order-specific endpoints
     items = [
         {
-            "order_id": order_id,
             "product_id": 2001,
             "quantity": 1,
             "unit_price": 25.00
         },
         {
-            "order_id": order_id,
             "product_id": 2002,
             "quantity": 3,
             "unit_price": 15.00
@@ -191,7 +188,7 @@ def test_get_order_items_by_order():
     ]
     
     for item in items:
-        client.post("/order-items/", json=item)
+        client.post(f"/orders/{order_id}/items", json=item)
     
     # Get all items for the order
     response = client.get(f"/orders/{order_id}/items")
@@ -201,7 +198,7 @@ def test_get_order_items_by_order():
     assert len(order_items) == 2
 
 def test_update_order_item():
-    """Test updating an existing order item"""
+    """Test updating an existing order item using order-specific endpoint"""
     # Create order and order item
     order_data = {
         "customer_id": 701,
@@ -213,24 +210,22 @@ def test_update_order_item():
     order_id = order_response.json()["order_id"]
     
     order_item_data = {
-        "order_id": order_id,
         "product_id": 3001,
         "quantity": 1,
         "unit_price": 30.00
     }
     
-    item_response = client.post("/order-items/", json=order_item_data)
+    item_response = client.post(f"/orders/{order_id}/items", json=order_item_data)
     item_id = item_response.json()["order_item_id"]
     
-    # Update the order item
+    # Update the order item using order-specific endpoint
     updated_data = {
-        "order_id": order_id,
         "product_id": 3002,
         "quantity": 2,
         "unit_price": 35.00
     }
     
-    response = client.put(f"/order-items/{item_id}", json=updated_data)
+    response = client.put(f"/orders/{order_id}/items/{item_id}", json=updated_data)
     assert response.status_code == 200
     
     updated_item = response.json()
@@ -239,7 +234,7 @@ def test_update_order_item():
     assert updated_item["line_total"] == 70.0
 
 def test_delete_order_item():
-    """Test deleting an order item"""
+    """Test deleting an order item using order-specific endpoint"""
     # Create order and order item
     order_data = {
         "customer_id": 801,
@@ -251,23 +246,23 @@ def test_delete_order_item():
     order_id = order_response.json()["order_id"]
     
     order_item_data = {
-        "order_id": order_id,
         "product_id": 4001,
         "quantity": 1,
         "unit_price": 40.00
     }
     
-    item_response = client.post("/order-items/", json=order_item_data)
+    item_response = client.post(f"/orders/{order_id}/items", json=order_item_data)
     item_id = item_response.json()["order_item_id"]
     
-    # Delete the order item
-    response = client.delete(f"/order-items/{item_id}")
+    # Delete the order item using order-specific endpoint
+    response = client.delete(f"/orders/{order_id}/items/{item_id}")
     assert response.status_code == 200
     assert response.json()["message"] == "Order item deleted successfully"
     
-    # Verify it's gone
-    get_response = client.get(f"/order-items/{item_id}")
-    assert get_response.status_code == 404
+    # Verify it's gone - check that the order has no items
+    get_response = client.get(f"/orders/{order_id}/items")
+    assert get_response.status_code == 200
+    assert len(get_response.json()) == 0
 
 def test_order_not_found():
     """Test handling of non-existent order"""
@@ -276,15 +271,14 @@ def test_order_not_found():
     assert "Order not found" in response.json()["detail"]
 
 def test_order_item_with_invalid_order():
-    """Test creating order item with non-existent order"""
+    """Test creating order item with non-existent order using order-specific endpoint"""
     order_item_data = {
-        "order_id": 99999,
         "product_id": 5001,
         "quantity": 1,
         "unit_price": 50.00
     }
     
-    response = client.post("/order-items/", json=order_item_data)
+    response = client.post("/orders/99999/items", json=order_item_data)
     assert response.status_code == 404
     assert "Order not found" in response.json()["detail"]
 

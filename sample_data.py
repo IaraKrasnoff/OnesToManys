@@ -12,11 +12,11 @@ def populate_sample_data():
     
     print("Creating sample orders...")
     
-    # Create sample orders
+    # Create sample orders (3 orders)
     orders_data = [
-        Order(customer_id=101, order_date=date(2025, 8, 10), total_amount=0.0),
-        Order(customer_id=102, order_date=date(2025, 8, 11), total_amount=0.0),
-        Order(customer_id=103, order_date=date(2025, 8, 12), total_amount=0.0),
+        Order(customer_id=101, order_date=date(2025, 8, 15), total_amount=0.0),
+        Order(customer_id=102, order_date=date(2025, 8, 16), total_amount=0.0),
+        Order(customer_id=103, order_date=date(2025, 8, 17), total_amount=0.0),
     ]
     
     created_orders = []
@@ -27,20 +27,22 @@ def populate_sample_data():
     
     print("\nCreating sample order items...")
     
-    # Create sample order items
+    # Create sample order items (3 items per order = 9 total items)
     order_items_data = [
-        # Order 1 items
-        OrderItem(order_id=created_orders[0].order_id, product_id=501, quantity=2, unit_price=10.50),
-        OrderItem(order_id=created_orders[0].order_id, product_id=502, quantity=1, unit_price=25.00),
+        # Order 1 items (3 items)
+        OrderItem(order_id=created_orders[0].order_id, product_id=501, quantity=2, unit_price=15.99),
+        OrderItem(order_id=created_orders[0].order_id, product_id=502, quantity=1, unit_price=25.50),
+        OrderItem(order_id=created_orders[0].order_id, product_id=503, quantity=3, unit_price=9.33),
         
-        # Order 2 items
-        OrderItem(order_id=created_orders[1].order_id, product_id=503, quantity=3, unit_price=15.75),
-        OrderItem(order_id=created_orders[1].order_id, product_id=504, quantity=1, unit_price=32.99),
-        OrderItem(order_id=created_orders[1].order_id, product_id=505, quantity=2, unit_price=8.50),
+        # Order 2 items (3 items)
+        OrderItem(order_id=created_orders[1].order_id, product_id=504, quantity=1, unit_price=49.99),
+        OrderItem(order_id=created_orders[1].order_id, product_id=505, quantity=2, unit_price=22.75),
+        OrderItem(order_id=created_orders[1].order_id, product_id=506, quantity=4, unit_price=11.75),
         
-        # Order 3 items
-        OrderItem(order_id=created_orders[2].order_id, product_id=506, quantity=4, unit_price=12.25),
-        OrderItem(order_id=created_orders[2].order_id, product_id=507, quantity=1, unit_price=45.00),
+        # Order 3 items (3 items)
+        OrderItem(order_id=created_orders[2].order_id, product_id=507, quantity=1, unit_price=35.00),
+        OrderItem(order_id=created_orders[2].order_id, product_id=508, quantity=3, unit_price=12.50),
+        OrderItem(order_id=created_orders[2].order_id, product_id=509, quantity=2, unit_price=12.38),
     ]
     
     for item in order_items_data:

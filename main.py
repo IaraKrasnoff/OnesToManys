@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from database import Order, OrderItem, OrderDatabase
@@ -13,6 +14,16 @@ class OrderItemRequest(BaseModel):
     unit_price: float
 
 app = FastAPI(title="Orders API", description="A master-detail orders management API", version="2.0.0")
+
+# Add CORS middleware to allow frontend access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 db = OrderDatabase()
 
 @app.get("/")
@@ -20,7 +31,7 @@ def read_root():
     """Welcome endpoint"""
     return {"message": "Welcome to the Orders API!", "endpoints": {
         "orders": "/orders/",
-        "order_items": "/order-items/",
+        "order_items": "/orders/{order_id}/items",
         "docs": "/docs"
     }}
 
@@ -61,33 +72,7 @@ def delete_order(order_id: int):
         raise HTTPException(status_code=404, detail="Order not found")
     return {"message": "Order deleted successfully"}
 
-# Order Item endpoints
-@app.post("/order-items/", response_model=OrderItem)
-def create_order_item(order_item: OrderItem):
-    """Create a new order item"""
-    try:
-        # Verify the order exists
-        if not db.get_order(order_item.order_id):
-            raise HTTPException(status_code=404, detail="Order not found")
-        return db.create_order_item(order_item)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to create order item: {str(e)}")
-
-@app.get("/order-items/", response_model=List[OrderItem])
-def get_all_order_items():
-    """Get all order items"""
-    return db.get_all_order_items()
-
-@app.get("/order-items/{order_item_id}", response_model=OrderItem)
-def get_order_item(order_item_id: int):
-    """Get a specific order item by ID"""
-    order_item = db.get_order_item(order_item_id)
-    if order_item is None:
-        raise HTTPException(status_code=404, detail="Order item not found")
-    return order_item
-
+# Order Item endpoints (simplified - only order-specific operations)
 @app.get("/orders/{order_id}/items", response_model=List[OrderItem])
 def get_order_items_by_order(order_id: int):
     """Get all order items for a specific order"""
@@ -95,21 +80,6 @@ def get_order_items_by_order(order_id: int):
     if not db.get_order(order_id):
         raise HTTPException(status_code=404, detail="Order not found")
     return db.get_order_items_by_order(order_id)
-
-@app.put("/order-items/{order_item_id}", response_model=OrderItem)
-def update_order_item(order_item_id: int, order_item: OrderItem):
-    """Update an existing order item"""
-    updated_order_item = db.update_order_item(order_item_id, order_item)
-    if updated_order_item is None:
-        raise HTTPException(status_code=404, detail="Order item not found")
-    return updated_order_item
-
-@app.delete("/order-items/{order_item_id}")
-def delete_order_item(order_item_id: int):
-    """Delete an order item"""
-    if not db.delete_order_item(order_item_id):
-        raise HTTPException(status_code=404, detail="Order item not found")
-    return {"message": "Order item deleted successfully"}
 
 # Enhanced Master-Detail Relationship Endpoints (Phase 2)
 @app.post("/orders/{order_id}/items", response_model=OrderItem)
@@ -361,11 +331,15 @@ def get_database_stats():
         product_stats[product_key]["quantity"] += item.quantity
         product_stats[product_key]["revenue"] += item.line_total or 0.0
     
+    # Format all revenue values to 2 decimal places
+    for product_key in product_stats:
+        product_stats[product_key]["revenue"] = round(product_stats[product_key]["revenue"], 2)
+    
     return {
         "total_orders": len(orders),
         "total_items": len(all_items),
-        "total_revenue": total_revenue,
-        "average_order_value": total_revenue / len(orders) if orders else 0.0,
+        "total_revenue": round(total_revenue, 2),
+        "average_order_value": round(total_revenue / len(orders), 2) if orders else 0.0,
         "unique_customers": len(customer_ids),
         "unique_products": len(product_ids),
         "customer_ids": sorted(customer_ids),
