@@ -1,52 +1,61 @@
-// API Configuration
+// ====================================================================
+// VANILLA JAVASCRIPT ORDERS MANAGEMENT APPLICATION
+// This file contains all the JavaScript code that makes the web page interactive
+// ====================================================================
+
+// API CONFIGURATION
+// This is the base URL where our FastAPI backend server is running
 const API_BASE_URL = 'http://localhost:8000';
 
-// Global state
-let currentOrderId = null;
-let currentItemId = null;
-let isEditMode = false;
+// GLOBAL STATE VARIABLES
+// These variables store information that needs to be shared across different functions
+let currentOrderId = null;    // Stores the ID of the order currently being edited
+let currentItemId = null;     // Stores the ID of the order item currently being edited  
+let isEditMode = false;       // Flag to track whether we're creating new data or editing existing data
 
-// Initialize the application
+// APPLICATION INITIALIZATION
+// This event listener runs when the HTML page has finished loading
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default date to today
-    const today = new Date().toISOString().split('T')[0];
+    // Set the default date picker value to today's date
+    const today = new Date().toISOString().split('T')[0];  // Get today's date in YYYY-MM-DD format
     const orderDateInput = document.getElementById('orderDate');
     if (orderDateInput) {
-        orderDateInput.value = today;
+        orderDateInput.value = today;  // Pre-populate the date field
     }
 
-    // Load initial data
-    loadDashboardStats();
-    loadOrders();
-    loadItems();
+    // Load initial data from the API to populate the page
+    loadDashboardStats();  // Load summary statistics for the dashboard
+    loadOrders();          // Load the list of orders
+    loadItems();           // Load the list of order items
 
-    // Setup form event listeners
+    // Set up event listeners for form submissions and button clicks
     setupFormListeners();
 });
 
-// Tab Management
+// TAB MANAGEMENT SYSTEM
+// This function handles switching between different tabs (Orders, Items, Analytics, etc.)
 function showTab(tabName) {
-    // Hide all tab contents
+    // Hide all tab contents by removing the 'active' class
     const tabContents = document.querySelectorAll('.tab-content');
     tabContents.forEach(tab => tab.classList.remove('active'));
 
-    // Remove active class from all tab buttons
+    // Remove the 'active' class from all tab buttons to deactivate them
     const tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(button => button.classList.remove('active'));
 
-    // Show selected tab content
+    // Show the selected tab content by adding the 'active' class
     const selectedTab = document.getElementById(tabName);
     if (selectedTab) {
         selectedTab.classList.add('active');
     }
 
-    // Add active class to clicked button
+    // Highlight the clicked tab button by adding the 'active' class
     event.target.classList.add('active');
 
-    // Load data based on selected tab
+    // Load the appropriate data based on which tab was selected
     switch(tabName) {
         case 'orders':
-            loadOrders();
+            loadOrders();        // Refresh the orders table
             break;
         case 'items':
             loadItems();
@@ -440,109 +449,180 @@ async function importData() {
     }
 }
 
-// Form Event Listeners
-function setupFormListeners() {
-    // Order form
-    document.getElementById('orderForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+// Modal Management for Atomic Order Creation
+function showOrderWithItemsModal() {
+    // Reset the modal
+    document.getElementById('newOrderCustomerId').value = '';
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('newOrderDate').value = today;
+    
+    // Clear any existing items
+    document.getElementById('itemsContainer').innerHTML = '';
+    document.getElementById('orderTotal').textContent = '0.00';
+    
+    // Add one initial item row
+    addItemRow();
+    
+    // Show the modal
+    document.getElementById('orderWithItemsModal').style.display = 'block';
+}
+
+function closeOrderWithItemsModal() {
+    document.getElementById('orderWithItemsModal').style.display = 'none';
+}
+
+let itemRowCounter = 0;
+
+function addItemRow() {
+    itemRowCounter++;
+    const container = document.getElementById('itemsContainer');
+    
+    const itemRow = document.createElement('div');
+    itemRow.className = 'item-row';
+    itemRow.id = `itemRow${itemRowCounter}`;
+    
+    itemRow.innerHTML = `
+        <div class="form-group">
+            <label>Product ID:</label>
+            <input type="number" class="item-product-id" required onchange="calculateOrderTotal()">
+            <div class="product-suggestions">
+                <button type="button" class="product-btn" onclick="setRowProductId(${itemRowCounter}, 1001)">1001</button>
+                <button type="button" class="product-btn" onclick="setRowProductId(${itemRowCounter}, 2001)">2001</button>
+                <button type="button" class="product-btn" onclick="setRowProductId(${itemRowCounter}, 501)">501</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Quantity:</label>
+            <input type="number" class="item-quantity" min="1" value="1" required onchange="calculateOrderTotal()">
+        </div>
+        <div class="form-group">
+            <label>Unit Price:</label>
+            <input type="number" class="item-price" step="0.01" min="0" required onchange="calculateOrderTotal()">
+        </div>
+        <div class="form-group">
+            <label>Total:</label>
+            <span class="line-total">$0.00</span>
+        </div>
+        <button type="button" class="remove-item-btn" onclick="removeItemRow(${itemRowCounter})" title="Remove Item">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(itemRow);
+    calculateOrderTotal();
+}
+
+function removeItemRow(rowId) {
+    const row = document.getElementById(`itemRow${rowId}`);
+    if (row) {
+        row.remove();
+        calculateOrderTotal();
+    }
+}
+
+function setRowProductId(rowId, productId) {
+    const row = document.getElementById(`itemRow${rowId}`);
+    if (row) {
+        const input = row.querySelector('.item-product-id');
+        input.value = productId;
+        calculateOrderTotal();
+    }
+}
+
+function calculateOrderTotal() {
+    let total = 0;
+    const itemRows = document.querySelectorAll('.item-row');
+    
+    itemRows.forEach(row => {
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const lineTotal = quantity * price;
         
-        const formData = {
-            customer_id: parseInt(document.getElementById('customerId').value),
-            order_date: document.getElementById('orderDate').value
-        };
+        // Update the line total display
+        row.querySelector('.line-total').textContent = `$${lineTotal.toFixed(2)}`;
         
-        try {
-            if (isEditMode && currentOrderId) {
-                await apiCall(`/orders/${currentOrderId}/`, {
-                    method: 'PUT',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Order updated successfully!');
-            } else {
-                await apiCall('/orders/', {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Order created successfully!');
-            }
-            
-            closeOrderModal();
-            loadOrders();
-            loadDashboardStats();
-        } catch (error) {
-            console.error('Failed to save order:', error);
-        }
+        total += lineTotal;
     });
     
-    // Item form
-    document.getElementById('itemForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Update the order total
+    document.getElementById('orderTotal').textContent = total.toFixed(2);
+}
+
+async function createOrderWithItems() {
+    try {
+        // Get order details
+        const customerId = parseInt(document.getElementById('newOrderCustomerId').value);
+        const orderDate = document.getElementById('newOrderDate').value;
         
-        const formData = {
-            order_id: parseInt(document.getElementById('itemOrderId').value),
-            product_id: parseInt(document.getElementById('productId').value),
-            quantity: parseInt(document.getElementById('quantity').value),
-            unit_price: parseFloat(document.getElementById('unitPrice').value)
-        };
+        if (!customerId || !orderDate) {
+            showToast('Please fill in all order details', 'error');
+            return;
+        }
         
-        try {
-            if (isEditMode && currentItemId) {
-                await apiCall(`/order-items/${currentItemId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Item updated successfully!');
-            } else {
-                await apiCall('/order-items/', {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Item created successfully!');
+        // Collect all items
+        const items = [];
+        const itemRows = document.querySelectorAll('.item-row');
+        
+        for (let row of itemRows) {
+            const productId = parseInt(row.querySelector('.item-product-id').value);
+            const quantity = parseInt(row.querySelector('.item-quantity').value);
+            const unitPrice = parseFloat(row.querySelector('.item-price').value);
+            
+            if (!productId || !quantity || !unitPrice) {
+                showToast('Please fill in all item details', 'error');
+                return;
             }
             
-            closeItemModal();
-            loadItems();
-            loadDashboardStats();
-        } catch (error) {
-            console.error('Failed to save item:', error);
-        }
-    });
-    
-    // Add item to order form
-    document.getElementById('addItemToOrderForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = {
-            product_id: parseInt(document.getElementById('newProductId').value),
-            quantity: parseInt(document.getElementById('newQuantity').value),
-            unit_price: parseFloat(document.getElementById('newUnitPrice').value)
-        };
-        
-        try {
-            if (currentItemId) {
-                // Update existing item
-                await apiCall(`/orders/${currentOrderId}/items/${currentItemId}/`, {
-                    method: 'PUT',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Item updated successfully!');
-            } else {
-                // Add new item
-                await apiCall(`/orders/${currentOrderId}/items/`, {
-                    method: 'POST',
-                    body: JSON.stringify(formData)
-                });
-                showToast('Item added successfully!');
+            if (quantity <= 0 || unitPrice <= 0) {
+                showToast('Quantity and price must be positive numbers', 'error');
+                return;
             }
             
-            closeAddItemToOrderModal();
-            loadOrderItems(currentOrderId);
-            loadOrders();
-            loadDashboardStats();
-        } catch (error) {
-            console.error('Failed to save order item:', error);
+            items.push({
+                product_id: productId,
+                quantity: quantity,
+                unit_price: unitPrice
+            });
         }
-    });
+        
+        if (items.length === 0) {
+            showToast('Please add at least one item to the order', 'error');
+            return;
+        }
+        
+        // Create the order with items atomically
+        const orderData = {
+            customer_id: customerId,
+            order_date: orderDate,
+            items: items
+        };
+        
+        showLoadingSpinner();
+        
+        const response = await apiCall('/orders/with-items/', {
+            method: 'POST',
+            body: JSON.stringify(orderData)
+        });
+        
+        const result = await response.json();
+        
+        hideLoadingSpinner();
+        closeOrderWithItemsModal();
+        
+        showToast(`Order #${result.order_id} created successfully with ${items.length} items! Total: $${result.total_amount.toFixed(2)}`);
+        
+        // Refresh the data
+        loadOrders();
+        loadItems();
+        loadDashboardStats();
+        
+    } catch (error) {
+        hideLoadingSpinner();
+        console.error('Failed to create order with items:', error);
+        showToast('Failed to create order with items. Please try again.', 'error');
+    }
 }
 
 // Modal Management
@@ -588,6 +668,32 @@ function closeItemModal() {
 
 function showAddItemToOrderModal() {
     document.getElementById('addItemToOrderForm').reset();
+    
+    // If we're in an order context, show which order we're adding to
+    if (currentOrderId) {
+        const modalTitle = document.querySelector('#addItemToOrderModal .modal-header h3');
+        modalTitle.textContent = `Add Item to Order #${currentOrderId}`;
+        
+        // Show the order ID in the modal for reference
+        const modalContent = document.querySelector('#addItemToOrderModal .modal-content');
+        let orderInfo = modalContent.querySelector('.order-info');
+        if (!orderInfo) {
+            orderInfo = document.createElement('div');
+            orderInfo.className = 'order-info';
+            modalContent.querySelector('.modal-header').appendChild(orderInfo);
+        }
+        orderInfo.innerHTML = `<small><i class="fas fa-info-circle"></i> Adding item to Order #${currentOrderId}</small>`;
+    } else {
+        const modalTitle = document.querySelector('#addItemToOrderModal .modal-header h3');
+        modalTitle.textContent = 'Add Item to Order';
+        
+        // Remove order info if it exists
+        const orderInfo = document.querySelector('#addItemToOrderModal .order-info');
+        if (orderInfo) {
+            orderInfo.remove();
+        }
+    }
+    
     currentItemId = null;
     document.getElementById('addItemToOrderModal').style.display = 'block';
 }
@@ -599,6 +705,20 @@ function closeAddItemToOrderModal() {
 }
 
 // Utility Functions
+function setProductId(productId) {
+    document.getElementById('newProductId').value = productId;
+    document.getElementById('newProductId').focus();
+}
+
+function setPrice(price) {
+    document.getElementById('newUnitPrice').value = price.toFixed(2);
+    document.getElementById('newUnitPrice').focus();
+}
+
+function formatCurrency(amount) {
+    return `$${amount.toFixed(2)}`;
+}
+
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -621,16 +741,28 @@ function showLoading(show) {
 }
 
 function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
     
-    toastMessage.textContent = message;
-    toast.className = `toast ${type}`;
-    toast.style.display = 'block';
+    document.body.appendChild(toast);
     
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Remove after 3 seconds
     setTimeout(() => {
-        toast.style.display = 'none';
+        toast.classList.remove('show');
+        setTimeout(() => document.body.removeChild(toast), 300);
     }, 3000);
+}
+
+function showLoadingSpinner() {
+    document.getElementById('loadingSpinner').style.display = 'flex';
+}
+
+function hideLoadingSpinner() {
+    document.getElementById('loadingSpinner').style.display = 'none';
 }
 
 // Close modals when clicking outside
@@ -638,6 +770,7 @@ window.addEventListener('click', function(event) {
     const orderModal = document.getElementById('orderModal');
     const itemModal = document.getElementById('itemModal');
     const addItemModal = document.getElementById('addItemToOrderModal');
+    const orderWithItemsModal = document.getElementById('orderWithItemsModal');
     
     if (event.target === orderModal) {
         closeOrderModal();
@@ -648,6 +781,9 @@ window.addEventListener('click', function(event) {
     if (event.target === addItemModal) {
         closeAddItemToOrderModal();
     }
+    if (event.target === orderWithItemsModal) {
+        closeOrderWithItemsModal();
+    }
 });
 
 // Handle escape key
@@ -656,5 +792,6 @@ document.addEventListener('keydown', function(event) {
         closeOrderModal();
         closeItemModal();
         closeAddItemToOrderModal();
+        closeOrderWithItemsModal();
     }
 });

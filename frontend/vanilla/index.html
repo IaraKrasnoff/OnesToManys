@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orders Management System</title>
+    <title>Iara's Orders Management System</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-shopping-cart"></i> Orders Management System</h1>
+            <h1><i class="fas fa-shopping-cart"></i> Iara's Orders Management System</h1>
             <div class="stats-bar">
                 <div class="stat-item">
                     <span class="stat-label">Total Orders:</span>
@@ -38,9 +38,14 @@
         <div id="orders" class="tab-content active">
             <div class="section-header">
                 <h2><i class="fas fa-receipt"></i> Orders Management</h2>
-                <button class="btn btn-primary" onclick="showCreateOrderModal()">
-                    <i class="fas fa-plus"></i> New Order
-                </button>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="showOrderWithItemsModal()">
+                        <i class="fas fa-shopping-cart"></i> New Order with Items
+                    </button>
+                    <button class="btn btn-primary" onclick="showCreateOrderModal()">
+                        <i class="fas fa-plus"></i> New Order Only
+                    </button>
+                </div>
             </div>
 
             <div class="table-container">
@@ -174,9 +179,17 @@
                 <hr>
                 <div class="section-header">
                     <h4><i class="fas fa-list"></i> Order Items</h4>
-                    <button type="button" class="btn btn-sm btn-primary" onclick="showAddItemToOrderModal()">
-                        <i class="fas fa-plus"></i> Add Item
-                    </button>
+                    <div class="section-actions">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="showAddItemToOrderModal()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" onclick="closeOrderModal()">
+                            <i class="fas fa-check"></i> Done Adding Items
+                        </button>
+                    </div>
+                </div>
+                <div class="order-items-help">
+                    <small><i class="fas fa-info-circle"></i> Click "Add Item" to add products to this order, or "Done Adding Items" when finished.</small>
                 </div>
                 <div id="orderItemsList">
                     <!-- Order items will be loaded here -->
@@ -228,20 +241,88 @@
                 <div class="form-group">
                     <label for="newProductId">Product ID:</label>
                     <input type="number" id="newProductId" required>
+                    <small class="form-help">
+                        <strong>Popular Products:</strong> 
+                        <span class="product-suggestions">
+                            <button type="button" class="product-btn" onclick="setProductId(1001)">1001</button>
+                            <button type="button" class="product-btn" onclick="setProductId(2001)">2001</button>
+                            <button type="button" class="product-btn" onclick="setProductId(2002)">2002</button>
+                            <button type="button" class="product-btn" onclick="setProductId(501)">501</button>
+                            <button type="button" class="product-btn" onclick="setProductId(999)">999</button>
+                        </span>
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="newQuantity">Quantity:</label>
-                    <input type="number" id="newQuantity" min="1" required>
+                    <input type="number" id="newQuantity" min="1" value="1" required>
                 </div>
                 <div class="form-group">
                     <label for="newUnitPrice">Unit Price:</label>
-                    <input type="number" id="newUnitPrice" step="0.01" min="0" required>
+                    <input type="number" id="newUnitPrice" step="0.01" min="0" placeholder="e.g., 25.99" required>
+                    <small class="form-help">
+                        <strong>Common Prices:</strong>
+                        <span class="price-suggestions">
+                            <button type="button" class="price-btn" onclick="setPrice(9.99)">$9.99</button>
+                            <button type="button" class="price-btn" onclick="setPrice(15.99)">$15.99</button>
+                            <button type="button" class="price-btn" onclick="setPrice(25.99)">$25.99</button>
+                            <button type="button" class="price-btn" onclick="setPrice(49.99)">$49.99</button>
+                        </span>
+                    </small>
                 </div>
                 <div class="form-buttons">
                     <button type="button" class="btn btn-secondary" onclick="closeAddItemToOrderModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add Item</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Create Order with Items Modal (Atomic Transaction) -->
+    <div id="orderWithItemsModal" class="modal">
+        <div class="modal-content order-with-items-content">
+            <div class="modal-header">
+                <h3>Create Order with Items</h3>
+                <span class="close" onclick="closeOrderWithItemsModal()">&times;</span>
+            </div>
+            
+            <!-- Order Details Section -->
+            <div class="order-details-section">
+                <h4><i class="fas fa-file-invoice"></i> Order Details</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newOrderCustomerId">Customer ID:</label>
+                        <input type="number" id="newOrderCustomerId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newOrderDate">Order Date:</label>
+                        <input type="date" id="newOrderDate" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Items Section -->
+            <div class="items-section">
+                <div class="section-header">
+                    <h4><i class="fas fa-list"></i> Order Items</h4>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addItemRow()">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                </div>
+                <div id="itemsContainer">
+                    <!-- Item rows will be added here -->
+                </div>
+                <div class="order-summary">
+                    <strong>Total: $<span id="orderTotal">0.00</span></strong>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="form-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeOrderWithItemsModal()">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="createOrderWithItems()">
+                    <i class="fas fa-shopping-cart"></i> Create Complete Order
+                </button>
+            </div>
         </div>
     </div>
 

@@ -1,47 +1,97 @@
+# ====================================================================
+# API TESTING SUITE - PHASE 1 TESTS
+# These tests verify that all basic CRUD operations work correctly
+# ====================================================================
+
+# Import pytest - Python's testing framework
 import pytest
+# Import OS utilities for file operations (like deleting test databases)
 import os
+# Import FastAPI's test client for making HTTP requests to our API
 from fastapi.testclient import TestClient
+# Import our main FastAPI application
 from main import app
+# Import our database classes
 from database import OrderDatabase
+# Import date handling
 from datetime import date
 
+# Create a test client that can make requests to our API
+# This simulates a web browser or frontend application making requests
 client = TestClient(app)
 
 @pytest.fixture
 def test_db():
-    """Create a test database that gets cleaned up after each test"""
-    test_db_path = "test_orders.db"
-    db = OrderDatabase(test_db_path)
-    yield db
-    # Cleanup
+    """
+    Create a test database that gets cleaned up after each test
+    A fixture is a special function that runs before each test to set up test data
+    The 'yield' keyword means: run everything before it for setup, 
+    then run the test, then run everything after it for cleanup
+    """
+    test_db_path = "test_orders.db"          # Use a separate database file for testing
+    db = OrderDatabase(test_db_path)         # Create a new database instance
+    yield db                                 # Provide the database to the test
+    # Cleanup code runs after the test finishes
     if os.path.exists(test_db_path):
-        os.remove(test_db_path)
+        os.remove(test_db_path)              # Delete the test database file
+
+# ====================================================================
+# BASIC ENDPOINT TESTS
+# ====================================================================
 
 def test_root_endpoint():
-    """Test the welcome endpoint"""
+    """
+    Test the welcome/root endpoint (GET /)
+    Purpose: Verify that the API server is running and responds correctly
+    What it tests: Basic server functionality and welcome message
+    """
+    # Make a GET request to the root URL
     response = client.get("/")
+    
+    # Check that the response was successful (HTTP 200 = OK)
     assert response.status_code == 200
+    
+    # Check that the response contains the expected welcome message
     assert "Welcome to the Orders API!" in response.json()["message"]
 
+# ====================================================================
+# ORDER CRUD TESTS (Create, Read, Update, Delete)
+# ====================================================================
+
 def test_create_order():
-    """Test creating a new order"""
+    """
+    Test creating a new order (POST /orders/)
+    Purpose: Verify that we can successfully create new orders
+    What it tests: Order creation, data validation, database insertion
+    """
+    # Define test data for a new order
     order_data = {
-        "customer_id": 101,
-        "order_date": "2025-08-12",
-        "total_amount": 0.0
+        "customer_id": 101,           # Which customer is placing this order
+        "order_date": "2025-08-12",   # When the order was placed
+        "total_amount": 0.0           # Initial total (will be calculated later)
     }
     
+    # Send a POST request to create the order
     response = client.post("/orders/", json=order_data)
+    
+    # Verify that the order was created successfully (HTTP 200 = OK)
     assert response.status_code == 200
     
+    # Get the created order data from the response
     created_order = response.json()
+    
+    # Verify that the order data was saved correctly
     assert created_order["customer_id"] == 101
     assert created_order["order_date"] == "2025-08-12"
-    assert "order_id" in created_order
+    assert "order_id" in created_order  # Make sure an ID was assigned
 
 def test_get_order():
-    """Test retrieving a specific order"""
-    # First create an order
+    """
+    Test retrieving a specific order (GET /orders/{id}/)
+    Purpose: Verify that we can fetch individual orders by their ID
+    What it tests: Order retrieval, database queries, data serialization
+    """
+    # Step 1: Create an order to test with
     order_data = {
         "customer_id": 102,
         "order_date": "2025-08-12",
@@ -225,7 +275,7 @@ def test_update_order_item():
         "unit_price": 35.00
     }
     
-    response = client.put(f"/orders/{order_id}/items/{item_id}", json=updated_data)
+    response = client.put(f"/orders/{order_id}/items/{item_id}/", json=updated_data)
     assert response.status_code == 200
     
     updated_item = response.json()
@@ -264,6 +314,56 @@ def test_delete_order_item():
     assert get_response.status_code == 200
     assert len(get_response.json()) == 0
 
+def test_get_all_order_items():
+    """Test the new /order-items/ endpoint that gets all items from all orders"""
+    # Create a couple of orders with items
+    order_data_1 = {
+        "customer_id": 901,
+        "order_date": "2025-08-12",
+        "total_amount": 0.0
+    }
+    
+    order_data_2 = {
+        "customer_id": 902,
+        "order_date": "2025-08-12",
+        "total_amount": 0.0
+    }
+    
+    order_response_1 = client.post("/orders/", json=order_data_1)
+    order_id_1 = order_response_1.json()["order_id"]
+    
+    order_response_2 = client.post("/orders/", json=order_data_2)
+    order_id_2 = order_response_2.json()["order_id"]
+    
+    # Add items to both orders
+    item_1 = {
+        "product_id": 9001,
+        "quantity": 1,
+        "unit_price": 10.00
+    }
+    
+    item_2 = {
+        "product_id": 9002,
+        "quantity": 2,
+        "unit_price": 20.00
+    }
+    
+    client.post(f"/orders/{order_id_1}/items", json=item_1)
+    client.post(f"/orders/{order_id_2}/items", json=item_2)
+    
+    # Test the new /order-items/ endpoint
+    response = client.get("/order-items/")
+    assert response.status_code == 200
+    
+    all_items = response.json()
+    # Should have at least the 2 items we just created (plus any existing ones)
+    assert len(all_items) >= 2
+    
+    # Verify the items are in the response
+    order_ids = [item["order_id"] for item in all_items]
+    assert order_id_1 in order_ids
+    assert order_id_2 in order_ids
+
 def test_order_not_found():
     """Test handling of non-existent order"""
     response = client.get("/orders/99999")
@@ -281,6 +381,69 @@ def test_order_item_with_invalid_order():
     response = client.post("/orders/99999/items", json=order_item_data)
     assert response.status_code == 404
     assert "Order not found" in response.json()["detail"]
+
+def test_create_order_with_items():
+    """Test creating an order with items in a single atomic transaction"""
+    order_data = {
+        "customer_id": 1001,
+        "order_date": "2025-08-12",
+        "items": [
+            {
+                "product_id": 5001,
+                "quantity": 2,
+                "unit_price": 15.99
+            },
+            {
+                "product_id": 5002,
+                "quantity": 1,
+                "unit_price": 29.99
+            }
+        ]
+    }
+    
+    response = client.post("/orders/with-items/", json=order_data)
+    assert response.status_code == 200
+    
+    created_order = response.json()
+    assert created_order["customer_id"] == 1001
+    assert created_order["order_date"] == "2025-08-12"
+    assert created_order["total_amount"] == 61.97  # (2 * 15.99) + (1 * 29.99)
+    assert "order_id" in created_order
+    
+    # Verify items were created
+    order_id = created_order["order_id"]
+    items_response = client.get(f"/orders/{order_id}/items/")
+    assert items_response.status_code == 200
+    
+    items = items_response.json()
+    assert len(items) == 2
+    
+    # Check first item
+    item1 = next(item for item in items if item["product_id"] == 5001)
+    assert item1["quantity"] == 2
+    assert item1["unit_price"] == 15.99
+    assert item1["line_total"] == 31.98
+    
+    # Check second item
+    item2 = next(item for item in items if item["product_id"] == 5002)
+    assert item2["quantity"] == 1
+    assert item2["unit_price"] == 29.99
+    assert item2["line_total"] == 29.99
+
+def test_create_order_with_no_items():
+    """Test creating an order with empty items list"""
+    order_data = {
+        "customer_id": 1002,
+        "order_date": "2025-08-12",
+        "items": []
+    }
+    
+    response = client.post("/orders/with-items/", json=order_data)
+    assert response.status_code == 200
+    
+    created_order = response.json()
+    assert created_order["customer_id"] == 1002
+    assert created_order["total_amount"] == 0.0
 
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

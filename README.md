@@ -7,15 +7,15 @@ Choosing one possible project relations below, you need to create a ListDetails 
 
 This means it will have a REST API middle-end, with a relational database backend.
 
-## Project Status: All Phases Complete! 🎉
+## Project Status: All Phases Complete!
 
-- ✅ **Phase 1**: Complete - Basic CRUD operations for Orders and Order Items
-- ✅ **Phase 2**: Complete - Enhanced relationships, GUI testing, data export/import
-- ✅ **Phase 3**: Complete - Vanilla JavaScript and React frontend applications
+- **Phase 1**: Complete - Basic CRUD operations for Orders and Order Items
+- **Phase 2**: Complete - Enhanced relationships, GUI testing, data export/import
+- **Phase 3**: Complete - Vanilla JavaScript and React frontend applications
 
 It has three phases.
 
-### Phase 1 (days 1-2) ✅ COMPLETE
+### Phase 1 (days 1-2) COMPLETE
 
 - build a plan for the project
 - design the database schema by building out data objects
@@ -26,7 +26,7 @@ It has three phases.
   - continue with `curl` and doing a GET of your _detail_ table
   - add the other CRUD operations for both master and detail tables
 
-### Phase 2 (days 3-4) ✅ COMPLETE
+### Phase 2 (days 3-4) COMPLETE
 
 - add a one to many relationship between your master and detail tables
 - add REST API endpoints for the one to many relationship

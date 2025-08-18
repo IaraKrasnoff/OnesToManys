@@ -1,112 +1,234 @@
+# Import FastAPI - the main web framework for building APIs
 from fastapi import FastAPI, HTTPException
+# Import CORS middleware - allows frontend websites to talk to our API
 from fastapi.middleware.cors import CORSMiddleware
+# Import typing helpers for better code documentation
 from typing import List, Dict, Any
+# Import Pydantic for data validation (ensures data is in correct format)
 from pydantic import BaseModel
+# Import our custom database classes and models
 from database import Order, OrderItem, OrderDatabase
-from datetime import date
+# Import date handling for working with dates
+from datetime import date, datetime
+# Import JSON for data serialization (converting Python objects to JSON)
 import json
+# Import OS utilities for file operations
 import os
 
+# Define a simplified data model for creating order items
+# This tells FastAPI what fields are required and their types
 class OrderItemRequest(BaseModel):
     """Simplified request model for creating order items"""
-    product_id: int
-    quantity: int
-    unit_price: float
+    product_id: int      # Which product is being ordered (must be an integer)
+    quantity: int        # How many of this product (must be an integer)
+    unit_price: float    # Price per item (must be a decimal number)
 
-app = FastAPI(title="Orders API", description="A master-detail orders management API", version="2.0.0")
+# Define a data model for creating orders with items in a single transaction
+class OrderWithItemsRequest(BaseModel):
+    """Request model for creating orders with items atomically"""
+    customer_id: int           # Which customer is placing this order
+    order_date: str           # When the order was placed (YYYY-MM-DD format)
+    items: List[OrderItemRequest] = []  # List of items to add to the order (optional)
 
-# Add CORS middleware to allow frontend access
+# Create the main FastAPI application instance
+# This is like creating a new web server that can handle HTTP requests
+app = FastAPI(title="Iara's Orders API", description="A master-detail orders management API", version="2.0.0")
+
+# Add CORS middleware to solve browser security restrictions
+# CORS = Cross-Origin Resource Sharing - allows websites to make API calls
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_origins=["*"],        # Allow requests from any website (in production, be more specific)
+    allow_credentials=True,     # Allow cookies and authentication headers
+    allow_methods=["*"],        # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],        # Allow all HTTP headers
 )
 
+# Create a database connection instance
+# This object handles all database operations (create, read, update, delete)
 db = OrderDatabase()
 
+# Define the root endpoint - this is what users see when they visit the main URL
 @app.get("/")
 def read_root():
-    """Welcome endpoint"""
+    """Welcome endpoint - provides basic API information"""
+    # Return a JSON response with welcome message and available endpoints
     return {"message": "Welcome to the Orders API!", "endpoints": {
-        "orders": "/orders/",
-        "order_items": "/orders/{order_id}/items",
-        "docs": "/docs"
+        "orders": "/orders/",                         # Endpoint for managing orders
+        "orders_with_items": "/orders/with-items/",   # Endpoint for creating orders with items atomically
+        "all_order_items": "/order-items/",           # Endpoint for getting all order items
+        "order_items": "/orders/{order_id}/items",    # Endpoint for managing items of specific order
+        "docs": "/docs"                               # Endpoint for API documentation
     }}
 
-# Order endpoints
+# ORDERS ENDPOINTS - These handle all operations related to orders
+
+# POST endpoint for creating new orders
+# The response_model tells FastAPI what format the response should have
 @app.post("/orders/", response_model=Order)
 def create_order(order: Order):
-    """Create a new order"""
+    """Create a new order in the database"""
     try:
+        # Try to create the order using our database class
         return db.create_order(order)
     except Exception as e:
+        # If something goes wrong, return a proper HTTP error response
         raise HTTPException(status_code=400, detail=f"Failed to create order: {str(e)}")
 
+# POST endpoint for creating new orders WITH items in a single transaction
+# This is more efficient and ensures data consistency
+@app.post("/orders/with-items/", response_model=Order)
+def create_order_with_items(order_request: OrderWithItemsRequest):
+    """Create a new order with items in a single atomic transaction"""
+    try:
+        # Parse the date string to a date object
+        order_date = datetime.strptime(order_request.order_date, "%Y-%m-%d").date()
+        
+        # Create the basic order first
+        order_data = Order(
+            customer_id=order_request.customer_id,
+            order_date=order_date,
+            total_amount=0.0  # Will be calculated from items
+        )
+        
+        # Create the order in the database
+        created_order = db.create_order(order_data)
+        
+        # If items were provided, add them to the order
+        if order_request.items and created_order.order_id is not None:
+            total_amount = 0.0
+            
+            for item_request in order_request.items:
+                # Calculate line total
+                line_total = item_request.quantity * item_request.unit_price
+                
+                # Create each item
+                item_data = OrderItem(
+                    order_id=created_order.order_id,
+                    product_id=item_request.product_id,
+                    quantity=item_request.quantity,
+                    unit_price=item_request.unit_price,
+                    line_total=line_total
+                )
+                
+                # Add item to database
+                db.create_order_item(item_data)
+                total_amount += line_total
+            
+            # Update the order with the calculated total
+            created_order.total_amount = total_amount
+            updated_order = db.update_order(created_order.order_id, created_order)
+            return updated_order if updated_order else created_order
+        
+        return created_order
+        
+    except Exception as e:
+        # If something goes wrong, return a proper HTTP error response
+        raise HTTPException(status_code=400, detail=f"Failed to create order with items: {str(e)}")
+
+# GET endpoint for retrieving all orders
+# Returns a list of Order objects
 @app.get("/orders/", response_model=List[Order])
 def get_all_orders():
-    """Get all orders"""
+    """Get all orders from the database"""
+    # Call the database method to fetch all orders
     return db.get_all_orders()
 
-@app.get("/orders/{order_id}", response_model=Order)
+# GET endpoint for retrieving a specific order by its ID
+# The {order_id} in the URL is a path parameter - it gets passed to the function
+@app.get("/orders/{order_id}/", response_model=Order)
 def get_order(order_id: int):
-    """Get a specific order by ID"""
+    """Get a specific order by its ID number"""
+    # Try to find the order in the database
     order = db.get_order(order_id)
+    # If no order is found, return a 404 (Not Found) error
     if order is None:
         raise HTTPException(status_code=404, detail="Order not found")
+    # If found, return the order data
     return order
 
-@app.put("/orders/{order_id}", response_model=Order)
+# PUT endpoint for updating an existing order
+# PUT is used for updating existing resources
+@app.put("/orders/{order_id}/", response_model=Order)
 def update_order(order_id: int, order: Order):
-    """Update an existing order"""
+    """Update an existing order with new information"""
+    # Try to update the order in the database
     updated_order = db.update_order(order_id, order)
+    # If the order doesn't exist, return a 404 error
     if updated_order is None:
         raise HTTPException(status_code=404, detail="Order not found")
+    # If successful, return the updated order data
     return updated_order
 
-@app.delete("/orders/{order_id}")
+# DELETE endpoint for removing an order
+# This will also delete all associated order items (cascade delete)
+@app.delete("/orders/{order_id}/")
 def delete_order(order_id: int):
-    """Delete an order (cascades to order items)"""
+    """Delete an order and all its associated items"""
+    # Try to delete the order from the database
     if not db.delete_order(order_id):
+        # If the order doesn't exist, return a 404 error
         raise HTTPException(status_code=404, detail="Order not found")
+    # If successful, return a confirmation message
     return {"message": "Order deleted successfully"}
 
-# Order Item endpoints (simplified - only order-specific operations)
-@app.get("/orders/{order_id}/items", response_model=List[OrderItem])
+# ORDER ITEM ENDPOINTS - These handle operations on individual items within orders
+
+# GET endpoint to retrieve all items that belong to a specific order
+# This demonstrates the "One-to-Many" relationship (one order has many items)
+@app.get("/orders/{order_id}/items/", response_model=List[OrderItem])
 def get_order_items_by_order(order_id: int):
     """Get all order items for a specific order"""
-    # Verify the order exists
+    # First, verify that the parent order actually exists
     if not db.get_order(order_id):
         raise HTTPException(status_code=404, detail="Order not found")
+    # If the order exists, get all its items
     return db.get_order_items_by_order(order_id)
 
-# Enhanced Master-Detail Relationship Endpoints (Phase 2)
-@app.post("/orders/{order_id}/items", response_model=OrderItem)
+# GET endpoint to retrieve ALL order items across all orders
+# This provides a standalone endpoint for accessing order items directly
+@app.get("/order-items/", response_model=List[OrderItem])
+def get_all_order_items():
+    """Get all order items from all orders in the database"""
+    # This is useful for getting a comprehensive view of all items
+    return db.get_all_order_items()
+
+# ENHANCED MASTER-DETAIL RELATIONSHIP ENDPOINTS (Phase 2 Features)
+# These endpoints understand the relationship between orders and items
+
+# POST endpoint to add a new item directly to a specific order
+# This is more convenient than creating an item and then linking it to an order
+@app.post("/orders/{order_id}/items/", response_model=OrderItem)
 def add_item_to_order(order_id: int, item_request: OrderItemRequest):
     """Add a new item to a specific order (enhanced relationship endpoint)"""
     try:
-        # Verify the order exists
+        # Verify that the parent order exists before adding items to it
         if not db.get_order(order_id):
             raise HTTPException(status_code=404, detail="Order not found")
         
-        # Create OrderItem from simplified request
+        # Create a full OrderItem object from the simplified request
+        # The order_id is automatically set from the URL parameter
         order_item = OrderItem(
-            order_id=order_id,
-            product_id=item_request.product_id,
-            quantity=item_request.quantity,
-            unit_price=item_request.unit_price
+            order_id=order_id,                    # Link this item to the specified order
+            product_id=item_request.product_id,   # What product is being ordered
+            quantity=item_request.quantity,       # How many units
+            unit_price=item_request.unit_price    # Price per unit
         )
+        # Save the new item to the database
         return db.create_order_item(order_item)
     except HTTPException:
+        # Re-raise HTTP exceptions (like 404) without modification
         raise
     except Exception as e:
+        # Convert any other errors to a 400 Bad Request response
         raise HTTPException(status_code=400, detail=f"Failed to add item to order: {str(e)}")
 
-@app.put("/orders/{order_id}/items/{order_item_id}", response_model=OrderItem)
+# PUT endpoint to update an item within the context of a specific order
+# This ensures the item actually belongs to the order being modified
+@app.put("/orders/{order_id}/items/{order_item_id}/", response_model=OrderItem)
 def update_order_item_in_order(order_id: int, order_item_id: int, item_request: OrderItemRequest):
-    """Update a specific item within a specific order"""
-    # Verify the order exists
+    """Update a specific item within a specific order (maintains relationship context)"""
+    # Verify that the parent order exists
     if not db.get_order(order_id):
         raise HTTPException(status_code=404, detail="Order not found")
     

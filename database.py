@@ -1,51 +1,82 @@
+# Import sqlite3 - Python's built-in database library for SQLite databases
 import sqlite3
+# Import typing helpers for better code documentation and type checking
 from typing import Optional, List
+# Import Pydantic for data models with automatic validation
 from pydantic import BaseModel
+# Import OS utilities for file system operations
 import os
+# Import date and datetime for handling date/time data
 from datetime import date, datetime
 
+# Define the Order data model
+# This represents a single order in our system
 class Order(BaseModel):
-    order_id: Optional[int] = None
-    customer_id: int
-    order_date: date
-    total_amount: Optional[float] = 0.0
+    """
+    Data model for an Order - the "Master" in our Master-Detail relationship
+    An order is placed by a customer and can contain multiple items
+    """
+    order_id: Optional[int] = None      # Primary key (auto-generated), optional for new orders
+    customer_id: int                    # Which customer placed this order (required)
+    order_date: date                    # When the order was placed (required)
+    total_amount: Optional[float] = 0.0 # Total price of all items (calculated automatically)
 
+# Define the OrderItem data model  
+# This represents a single item within an order
 class OrderItem(BaseModel):
-    order_item_id: Optional[int] = None
-    order_id: int
-    product_id: int
-    quantity: int
-    unit_price: float
-    line_total: Optional[float] = None
+    """
+    Data model for an OrderItem - the "Detail" in our Master-Detail relationship
+    Each order item belongs to exactly one order and represents one product in that order
+    """
+    order_item_id: Optional[int] = None  # Primary key (auto-generated), optional for new items
+    order_id: int                        # Foreign key - which order this item belongs to (required)
+    product_id: int                      # Which product is being ordered (required)
+    quantity: int                        # How many units of this product (required)
+    unit_price: float                    # Price per unit (required)
+    line_total: Optional[float] = None   # Total for this line item (calculated: quantity × unit_price)
 
+# Database class that handles all data operations
+# This is like a "data access layer" that sits between our API and the database
 class OrderDatabase:
+    """
+    Database class that manages all order and order item operations
+    Uses SQLite as the database engine (lightweight, file-based database)
+    """
+    
     def __init__(self, db_path: str = "orders.db"):
-        self.db_path = db_path
-        self.init_db()
+        """
+        Initialize the database connection and create tables if needed
+        Args:
+            db_path: Path to the SQLite database file (defaults to 'orders.db')
+        """
+        self.db_path = db_path  # Store the database file path
+        self.init_db()          # Create database tables if they don't exist
     
     def init_db(self):
         """Create the orders and order_items tables if they don't exist"""
+        # Use 'with' statement to ensure database connection is properly closed
         with sqlite3.connect(self.db_path) as conn:
-            # Create Orders table
+            
+            # Create the Orders table (Master table)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
-                    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    customer_id INTEGER NOT NULL,
-                    order_date DATE NOT NULL,
-                    total_amount DECIMAL(10, 2) DEFAULT 0.00
+                    order_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-incrementing primary key
+                    customer_id INTEGER NOT NULL,                -- Customer who placed the order
+                    order_date DATE NOT NULL,                    -- When the order was placed
+                    total_amount DECIMAL(10, 2) DEFAULT 0.00     -- Total value (up to 10 digits, 2 decimal places)
                 )
             """)
             
-            # Create OrderItems table
+            # Create the Order Items table (Detail table)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS order_items (
-                    order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    order_id INTEGER NOT NULL,
-                    product_id INTEGER NOT NULL,
-                    quantity INTEGER NOT NULL,
-                    unit_price DECIMAL(10, 2) NOT NULL,
-                    line_total DECIMAL(10, 2) NOT NULL,
-                    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+                    order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-incrementing primary key
+                    order_id INTEGER NOT NULL,                        -- Foreign key to orders table
+                    product_id INTEGER NOT NULL,                      -- Which product is being ordered
+                    quantity INTEGER NOT NULL,                        -- How many units
+                    unit_price DECIMAL(10, 2) NOT NULL,              -- Price per unit
+                    line_total DECIMAL(10, 2) NOT NULL,              -- Total for this line (quantity × unit_price)
+                    FOREIGN KEY (order_id) REFERENCES orders(order_id)  -- Enforces relationship integrity
                 )
             """)
             conn.commit()

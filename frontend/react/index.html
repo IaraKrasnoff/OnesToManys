@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orders Management - React</title>
+    <title>Iara's Orders Management - React</title>
     <!-- React and ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -35,7 +35,7 @@
 
         /* Header */
         .app-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff7b42 0%, #ff69b4 100%);
             color: white;
             padding: 30px;
             border-radius: 10px;
@@ -109,7 +109,7 @@
         }
 
         .tab-button.active {
-            background: #667eea;
+            background: #ff7b42;
             color: white;
             border-bottom-color: #ffd700;
         }
@@ -156,13 +156,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff7b42 0%, #ff69b4 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 123, 66, 0.4);
         }
 
         .btn-secondary {
@@ -211,7 +211,7 @@
         }
 
         .data-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff7b42 0%, #ff69b4 100%);
             color: white;
             padding: 15px;
             text-align: left;
@@ -263,7 +263,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff7b42 0%, #ff69b4 100%);
             color: white;
             padding: 20px 30px;
             border-radius: 10px 10px 0 0;
@@ -313,8 +313,8 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #ff7b42;
+            box-shadow: 0 0 0 3px rgba(255, 123, 66, 0.1);
         }
 
         .form-buttons {
@@ -407,40 +407,296 @@
             background: white;
             margin-bottom: 5px;
             border-radius: 5px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #ff7b42;
         }
 
-        /* Responsive */
+        /* Order with Items Form Styles */
+        .order-with-items-form {
+            max-width: 800px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #ff7b42;
+        }
+
+        .form-section h4 {
+            margin-bottom: 15px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .items-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 120px 140px 140px 40px;
+            gap: 15px;
+            align-items: end;
+            padding: 15px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .item-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .product-dropdown {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .product-dropdown:focus {
+            outline: none;
+            border-color: #ff7b42;
+            box-shadow: 0 0 0 2px rgba(255, 123, 66, 0.2);
+        }
+
+        .price-display {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .line-total {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+            display: block;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .remove-item-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .remove-item-btn:hover {
+            background: #c82333;
+        }
+
+        .order-summary {
+            text-align: right;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1.3em;
+            color: #495057;
+        }
+
+        /* Responsive adjustments for order form */
         @media (max-width: 768px) {
-            .app-container {
-                padding: 10px;
+            .form-row {
+                grid-template-columns: 1fr;
             }
 
-            .stats-bar {
-                flex-direction: column;
+            .item-row {
+                grid-template-columns: 1fr;
                 gap: 10px;
             }
 
-            .section-header {
+            .item-row .form-group label {
+                font-weight: bold;
+                margin-bottom: 5px;
+                display: block;
+            }
+
+            .product-dropdown {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
+
+        /* Order Details Styles */
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff7b42;
+            transition: all 0.2s ease;
+        }
+
+        .order-item-row:hover {
+            background: #e9ecef;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-main {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .item-details {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .edit-quantity {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .quantity-input:focus {
+            outline: none;
+            border-color: #ff7b42;
+            box-shadow: 0 0 0 2px rgba(255, 123, 66, 0.2);
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .item-total {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-xs {
+            padding: 5px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-xs:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-xs.btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-xs.btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-xs.btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-xs.btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-xs.btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-xs.btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-xs.btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-xs.btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Responsive styles for order details */
+        @media (max-width: 768px) {
+            .order-item-row {
                 flex-direction: column;
-                gap: 15px;
-                text-align: center;
+                align-items: flex-start;
+                gap: 10px;
             }
 
-            .tab-nav {
-                flex-wrap: wrap;
-            }
-
-            .tab-button {
-                flex: 1 1 50%;
-                min-width: 120px;
+            .item-actions {
+                align-self: stretch;
+                justify-content: space-between;
             }
 
             .action-buttons {
-                flex-direction: column;
-                gap: 2px;
+                gap: 8px;
             }
         }
+
     </style>
 </head>
 <body>
@@ -657,8 +913,241 @@
             );
         };
 
+        // Order with Items Form Component (Atomic Transaction)
+        const OrderWithItemsForm = ({ onSave, onCancel, showToast }) => {
+            // Available products with their prices
+            const availableProducts = [
+                { id: 1001, name: 'Laptop Pro', price: 999.99 },
+                { id: 2001, name: 'Wireless Headphones', price: 159.99 },
+                { id: 2002, name: 'Smart Watch', price: 299.99 },
+                { id: 501, name: 'USB Cable', price: 15.99 },
+                { id: 1002, name: 'Gaming Mouse', price: 79.99 },
+                { id: 1003, name: 'Mechanical Keyboard', price: 129.99 },
+                { id: 3001, name: 'Tablet', price: 449.99 },
+                { id: 3002, name: 'Phone Case', price: 24.99 }
+            ];
+
+            const [orderData, setOrderData] = useState({
+                customer_id: '',
+                order_date: new Date().toISOString().split('T')[0]
+            });
+
+            const [items, setItems] = useState([
+                { product_id: '', quantity: 1, unit_price: 0 }
+            ]);
+
+            const [orderTotal, setOrderTotal] = useState(0);
+
+            // Calculate total whenever items change
+            useEffect(() => {
+                const total = items.reduce((sum, item) => {
+                    const lineTotal = (item.quantity || 0) * (item.unit_price || 0);
+                    return sum + lineTotal;
+                }, 0);
+                setOrderTotal(total);
+            }, [items]);
+
+            const handleOrderChange = (e) => {
+                setOrderData({
+                    ...orderData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            const handleItemChange = (index, field, value) => {
+                const updatedItems = [...items];
+                
+                if (field === 'product_id') {
+                    // When product changes, automatically set the price
+                    const selectedProduct = availableProducts.find(p => p.id === parseInt(value));
+                    updatedItems[index] = {
+                        ...updatedItems[index],
+                        product_id: value,
+                        unit_price: selectedProduct ? selectedProduct.price : 0
+                    };
+                } else if (field === 'quantity') {
+                    updatedItems[index] = {
+                        ...updatedItems[index],
+                        [field]: parseInt(value) || 0
+                    };
+                } else {
+                    updatedItems[index] = {
+                        ...updatedItems[index],
+                        [field]: value
+                    };
+                }
+                
+                setItems(updatedItems);
+            };
+
+            const addItem = () => {
+                setItems([...items, { product_id: '', quantity: 1, unit_price: 0 }]);
+            };
+
+            const removeItem = (index) => {
+                if (items.length > 1) {
+                    setItems(items.filter((_, i) => i !== index));
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                // Validate order data
+                if (!orderData.customer_id || !orderData.order_date) {
+                    showToast('Please fill in all order details', 'error');
+                    return;
+                }
+
+                // Validate items
+                const validItems = items.filter(item => 
+                    item.product_id && item.quantity > 0 && item.unit_price > 0
+                );
+
+                if (validItems.length === 0) {
+                    showToast('Please add at least one valid item', 'error');
+                    return;
+                }
+
+                // Prepare data for atomic creation
+                const orderWithItems = {
+                    customer_id: parseInt(orderData.customer_id),
+                    order_date: orderData.order_date,
+                    items: validItems.map(item => ({
+                        product_id: parseInt(item.product_id),
+                        quantity: parseInt(item.quantity),
+                        unit_price: parseFloat(item.unit_price)
+                    }))
+                };
+
+                onSave(orderWithItems);
+            };
+
+            return (
+                <div className="order-with-items-form">
+                    <form onSubmit={handleSubmit}>
+                        {/* Order Details Section */}
+                        <div className="form-section">
+                            <h4><i className="fas fa-file-invoice"></i> Order Details</h4>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label htmlFor="customer_id">Customer ID:</label>
+                                    <input
+                                        type="number"
+                                        id="customer_id"
+                                        name="customer_id"
+                                        value={orderData.customer_id}
+                                        onChange={handleOrderChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="order_date">Order Date:</label>
+                                    <input
+                                        type="date"
+                                        id="order_date"
+                                        name="order_date"
+                                        value={orderData.order_date}
+                                        onChange={handleOrderChange}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Items Section */}
+                        <div className="form-section">
+                            <div className="section-header">
+                                <h4><i className="fas fa-list"></i> Order Items</h4>
+                                <button type="button" className="btn btn-sm btn-primary" onClick={addItem}>
+                                    <i className="fas fa-plus"></i> Add Item
+                                </button>
+                            </div>
+
+                            <div className="items-container">
+                                {items.map((item, index) => {
+                                    const selectedProduct = availableProducts.find(p => p.id === parseInt(item.product_id));
+                                    
+                                    return (
+                                        <div key={index} className="item-row">
+                                            <div className="form-group">
+                                                <label>Product:</label>
+                                                <select
+                                                    value={item.product_id}
+                                                    onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
+                                                    required
+                                                    className="product-dropdown"
+                                                >
+                                                    <option value="">Select a product...</option>
+                                                    {availableProducts.map(product => (
+                                                        <option key={product.id} value={product.id}>
+                                                            {product.id} - {product.name} (${product.price})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            
+                                            <div className="form-group">
+                                                <label>Quantity:</label>
+                                                <input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                                                    min="1"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Unit Price:</label>
+                                                <div className="price-display">
+                                                    ${item.unit_price ? item.unit_price.toFixed(2) : '0.00'}
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label>Line Total:</label>
+                                                <span className="line-total">
+                                                    ${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}
+                                                </span>
+                                            </div>
+
+                                            {items.length > 1 && (
+                                                <button 
+                                                    type="button" 
+                                                    className="remove-item-btn"
+                                                    onClick={() => removeItem(index)}
+                                                    title="Remove Item"
+                                                >
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="order-summary">
+                                <strong>Total: ${orderTotal.toFixed(2)}</strong>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="form-buttons">
+                            <button type="button" className="btn btn-secondary" onClick={onCancel}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn btn-success">
+                                <i className="fas fa-save"></i> Create Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+
         // Orders Table Component
-        const OrdersTable = ({ orders, onEdit, onDelete, onViewDetails }) => (
+        const OrdersTable = ({ orders, onDelete, onViewDetails }) => (
             <div className="table-container">
                 <table className="data-table">
                     <thead>
@@ -684,12 +1173,6 @@
                                             onClick={() => onViewDetails(order.order_id)}
                                         >
                                             <i className="fas fa-eye"></i> Details
-                                        </button>
-                                        <button 
-                                            className="btn btn-sm btn-warning"
-                                            onClick={() => onEdit(order)}
-                                        >
-                                            <i className="fas fa-edit"></i> Edit
                                         </button>
                                         <button 
                                             className="btn btn-sm btn-danger"
@@ -754,29 +1237,72 @@
         );
 
         // Order Details Component
-        const OrderDetails = ({ orderId, onClose }) => {
+        const OrderDetails = ({ orderId, onClose, showToast, onRefresh }) => {
             const [order, setOrder] = useState(null);
             const [summary, setSummary] = useState(null);
             const [loading, setLoading] = useState(true);
+            const [editingItem, setEditingItem] = useState(null);
+            const [editQuantity, setEditQuantity] = useState(1);
+
+            const loadOrderDetails = async () => {
+                try {
+                    const [orderData, summaryData] = await Promise.all([
+                        apiCall(`/orders/${orderId}/`),
+                        apiCall(`/orders/${orderId}/summary/`)
+                    ]);
+                    setOrder(orderData);
+                    setSummary(summaryData);
+                } catch (error) {
+                    console.error('Failed to load order details:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
 
             useEffect(() => {
-                const loadOrderDetails = async () => {
-                    try {
-                        const [orderData, summaryData] = await Promise.all([
-                            apiCall(`/orders/${orderId}/`),
-                            apiCall(`/orders/${orderId}/summary/`)
-                        ]);
-                        setOrder(orderData);
-                        setSummary(summaryData);
-                    } catch (error) {
-                        console.error('Failed to load order details:', error);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-
                 loadOrderDetails();
             }, [orderId]);
+
+            const handleEditItem = (item) => {
+                setEditingItem(item.order_item_id);
+                setEditQuantity(item.quantity);
+            };
+
+            const handleSaveEdit = async (itemId) => {
+                try {
+                    await apiCall(`/order-items/${itemId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            quantity: parseInt(editQuantity)
+                        })
+                    });
+                    
+                    showToast('Item quantity updated successfully!');
+                    setEditingItem(null);
+                    await loadOrderDetails();
+                    if (onRefresh) onRefresh(); // Refresh parent data
+                } catch (error) {
+                    showToast('Failed to update item', 'error');
+                }
+            };
+
+            const handleCancelEdit = () => {
+                setEditingItem(null);
+                setEditQuantity(1);
+            };
+
+            const handleDeleteItem = async (itemId) => {
+                if (window.confirm('Are you sure you want to delete this item?')) {
+                    try {
+                        await apiCall(`/order-items/${itemId}`, { method: 'DELETE' });
+                        showToast('Item deleted successfully!');
+                        await loadOrderDetails();
+                        if (onRefresh) onRefresh(); // Refresh parent data
+                    } catch (error) {
+                        showToast('Failed to delete item', 'error');
+                    }
+                }
+            };
 
             if (loading) {
                 return (
@@ -814,21 +1340,75 @@
                             <p>No items in this order</p>
                         ) : (
                             summary.items.map(item => (
-                                <div key={item.order_item_id} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    padding: '10px',
-                                    background: '#f8f9fa',
-                                    margin: '5px 0',
-                                    borderRadius: '5px',
-                                    borderLeft: '4px solid #667eea'
-                                }}>
-                                    <div>
-                                        <strong>Product #{item.product_id}</strong><br />
-                                        Qty: {item.quantity} × ${item.unit_price.toFixed(2)}
+                                <div key={item.order_item_id} className="order-item-row">
+                                    <div className="item-info">
+                                        <div className="item-main">
+                                            <strong>Product #{item.product_id}</strong>
+                                        </div>
+                                        <div className="item-details">
+                                            {editingItem === item.order_item_id ? (
+                                                <div className="edit-quantity">
+                                                    <span>Qty: </span>
+                                                    <input
+                                                        type="number"
+                                                        value={editQuantity}
+                                                        onChange={(e) => setEditQuantity(e.target.value)}
+                                                        min="1"
+                                                        className="quantity-input"
+                                                    />
+                                                    <span> × ${item.unit_price.toFixed(2)}</span>
+                                                </div>
+                                            ) : (
+                                                <span>Qty: {item.quantity} × ${item.unit_price.toFixed(2)}</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <strong>${item.line_total.toFixed(2)}</strong>
+                                    <div className="item-actions">
+                                        <div className="item-total">
+                                            <strong>
+                                                ${editingItem === item.order_item_id 
+                                                    ? (editQuantity * item.unit_price).toFixed(2)
+                                                    : item.line_total.toFixed(2)
+                                                }
+                                            </strong>
+                                        </div>
+                                        <div className="action-buttons">
+                                            {editingItem === item.order_item_id ? (
+                                                <>
+                                                    <button 
+                                                        className="btn btn-xs btn-success"
+                                                        onClick={() => handleSaveEdit(item.order_item_id)}
+                                                        title="Save"
+                                                    >
+                                                        <i className="fas fa-check"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-xs btn-secondary"
+                                                        onClick={handleCancelEdit}
+                                                        title="Cancel"
+                                                    >
+                                                        <i className="fas fa-times"></i>
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button 
+                                                        className="btn btn-xs btn-warning"
+                                                        onClick={() => handleEditItem(item)}
+                                                        title="Edit Quantity"
+                                                    >
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button 
+                                                        className="btn btn-xs btn-danger"
+                                                        onClick={() => handleDeleteItem(item.order_item_id)}
+                                                        title="Delete Item"
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))
@@ -892,10 +1472,9 @@
             const [loading, setLoading] = useState(false);
             
             // Modal states
-            const [orderModalOpen, setOrderModalOpen] = useState(false);
+            const [orderWithItemsModalOpen, setOrderWithItemsModalOpen] = useState(false);
             const [itemModalOpen, setItemModalOpen] = useState(false);
             const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-            const [selectedOrder, setSelectedOrder] = useState(null);
             const [selectedItem, setSelectedItem] = useState(null);
             const [selectedOrderId, setSelectedOrderId] = useState(null);
             
@@ -946,37 +1525,8 @@
             };
 
             // CRUD operations
-            const handleCreateOrder = () => {
-                setSelectedOrder(null);
-                setOrderModalOpen(true);
-            };
-
-            const handleEditOrder = (order) => {
-                setSelectedOrder(order);
-                setOrderModalOpen(true);
-            };
-
-            const handleSaveOrder = async (orderData) => {
-                try {
-                    if (selectedOrder) {
-                        await apiCall(`/orders/${selectedOrder.order_id}/`, {
-                            method: 'PUT',
-                            body: JSON.stringify(orderData)
-                        });
-                        showToast('Order updated successfully!');
-                    } else {
-                        await apiCall('/orders/', {
-                            method: 'POST',
-                            body: JSON.stringify(orderData)
-                        });
-                        showToast('Order created successfully!');
-                    }
-                    
-                    setOrderModalOpen(false);
-                    await Promise.all([loadOrders(), loadStats()]);
-                } catch (error) {
-                    showToast('Failed to save order', 'error');
-                }
+            const handleCreateOrderWithItems = () => {
+                setOrderWithItemsModalOpen(true);
             };
 
             const handleDeleteOrder = async (orderId) => {
@@ -988,6 +1538,24 @@
                     } catch (error) {
                         showToast('Failed to delete order', 'error');
                     }
+                }
+            };
+
+            const handleSaveOrderWithItems = async (orderWithItemsData) => {
+                try {
+                    const response = await apiCall('/orders/with-items/', {
+                        method: 'POST',
+                        body: JSON.stringify(orderWithItemsData)
+                    });
+                    
+                    const result = response;
+                    showToast(`Order #${result.order_id} created successfully with ${orderWithItemsData.items.length} items! Total: $${result.total_amount.toFixed(2)}`);
+                    
+                    setOrderWithItemsModalOpen(false);
+                    await Promise.all([loadOrders(), loadItems(), loadStats()]);
+                } catch (error) {
+                    console.error('Failed to create order with items:', error);
+                    showToast('Failed to create order with items', 'error');
                 }
             };
 
@@ -1041,6 +1609,10 @@
                 setDetailsModalOpen(true);
             };
 
+            const handleRefreshData = async () => {
+                await Promise.all([loadOrders(), loadItems(), loadStats()]);
+            };
+
             // Tab switching
             const handleTabChange = (tab) => {
                 setActiveTab(tab);
@@ -1073,13 +1645,14 @@
                             <>
                                 <div className="section-header">
                                     <h2><i className="fas fa-receipt"></i> Orders Management</h2>
-                                    <button className="btn btn-primary" onClick={handleCreateOrder}>
-                                        <i className="fas fa-plus"></i> New Order
-                                    </button>
+                                    <div className="header-actions">
+                                        <button className="btn btn-primary" onClick={handleCreateOrderWithItems}>
+                                            <i className="fas fa-plus"></i> New Order
+                                        </button>
+                                    </div>
                                 </div>
                                 <OrdersTable 
                                     orders={orders}
-                                    onEdit={handleEditOrder}
                                     onDelete={handleDeleteOrder}
                                     onViewDetails={handleViewOrderDetails}
                                 />
@@ -1125,7 +1698,7 @@
                 <div className="app-container">
                     {/* Header */}
                     <header className="app-header">
-                        <h1><i className="fas fa-shopping-cart"></i> Orders Management System</h1>
+                        <h1><i className="fas fa-shopping-cart"></i> Iara's Orders Management System</h1>
                         <p className="subtitle">React Application</p>
                         
                         {stats && (
@@ -1175,18 +1748,6 @@
 
                     {/* Modals */}
                     <Modal 
-                        isOpen={orderModalOpen} 
-                        onClose={() => setOrderModalOpen(false)}
-                        title={selectedOrder ? `Edit Order #${selectedOrder.order_id}` : 'Create New Order'}
-                    >
-                        <OrderForm 
-                            order={selectedOrder}
-                            onSave={handleSaveOrder}
-                            onCancel={() => setOrderModalOpen(false)}
-                        />
-                    </Modal>
-
-                    <Modal 
                         isOpen={itemModalOpen} 
                         onClose={() => setItemModalOpen(false)}
                         title={selectedItem ? `Edit Item #${selectedItem.order_item_id}` : 'Create New Item'}
@@ -1207,8 +1768,22 @@
                             <OrderDetails 
                                 orderId={selectedOrderId}
                                 onClose={() => setDetailsModalOpen(false)}
+                                showToast={showToast}
+                                onRefresh={handleRefreshData}
                             />
                         )}
+                    </Modal>
+
+                    <Modal 
+                        isOpen={orderWithItemsModalOpen} 
+                        onClose={() => setOrderWithItemsModalOpen(false)}
+                        title="Create New Order"
+                    >
+                        <OrderWithItemsForm 
+                            onSave={handleSaveOrderWithItems}
+                            onCancel={() => setOrderWithItemsModalOpen(false)}
+                            showToast={showToast}
+                        />
                     </Modal>
 
                     {/* Toast */}

@@ -1,4 +1,4 @@
-# 🚀 OnesToManys - Browser Launch Guide
+# OnesToManys - Browser Launch Guide
 
 ## Prerequisites
 Make sure you have both servers running:
@@ -17,7 +17,7 @@ cd frontend && python -m http.server 3000
 ```
 **Frontend will be available at:** http://localhost:3000
 
-## 🌐 Access URLs in Google Chrome
+## Access URLs in Google Chrome
 
 ### Frontend Applications:
 - **React Application**: http://localhost:3000/react/
@@ -28,7 +28,7 @@ cd frontend && python -m http.server 3000
 - **API Base URL**: http://localhost:8000
 - **API Health Check**: http://localhost:8000/
 
-## 🎯 What You'll See:
+## What You'll See:
 
 ### React Application Features:
 - Modern, responsive interface
@@ -49,7 +49,7 @@ cd frontend && python -m http.server 3000
 - Complete endpoint documentation
 - Try-it-out functionality for all endpoints
 
-## 🔧 Troubleshooting:
+## Troubleshooting:
 
 ### If React App Shows Blank:
 1. Check browser console for JavaScript errors (F12 → Console)
@@ -61,10 +61,10 @@ cd frontend && python -m http.server 3000
 2. Check CORS configuration (should be already configured)
 3. Verify database has data: `http://localhost:8000/orders/`
 
-## 📊 Quick Test Sequence:
+## Quick Test Sequence:
 1. Open http://localhost:8000/docs - Should show FastAPI documentation
 2. Open http://localhost:3000/react/ - Should show React application
 3. Open http://localhost:3000/vanilla/ - Should show Vanilla JS application
 4. Test API in browser: http://localhost:8000/orders/ - Should return JSON data
 
-## 🎉 Enjoy exploring your OnesToManys project!
+## Enjoy exploring your OnesToManys project!
